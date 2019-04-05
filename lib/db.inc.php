@@ -23,6 +23,19 @@ function conn() {
     return $conn;
 }
 
+function make_url($path, $query=[]) {
+    $result = $path;
+    if ($path == '/login' && isset($query['location']) && $query['location'] == '/') {
+        unset($query['location']);
+    }
+    $char = '?';
+    foreach ($query as $key => $val) {
+        $result .= $char . urlencode($key) . '=' . urlencode($val);
+        $char = '&';
+    }
+    return $result;
+}
+
 class NotFoundException extends Exception {}
 
 class Game {
