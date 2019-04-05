@@ -1,5 +1,7 @@
 <?
 require_once 'lib/db.inc.php';
+require_once 'lib/session.inc.php';
+require_once 'lib/site.inc.php';
 
 $user = User::require_login();
 
