@@ -40,7 +40,7 @@ class Game {
     }
 
     static function all() {
-        $stmt = conn()->prepare("SELECT id, url, name FROM `game`");
+        $stmt = conn()->prepare('SELECT id, url, name FROM `game`');
         $stmt->bind_result($id, $url, $name);
         $stmt->execute();
         $result = [];
@@ -91,7 +91,7 @@ class Game {
     }
 
     protected function load_users() {
-        $stmt = conn()->prepare("SELECT user_id, gm FROM `game_user` WHERE game_id = ?");
+        $stmt = conn()->prepare('SELECT user_id, gm FROM `game_user` WHERE game_id = ?');
         $stmt->bind_param('i', $this->id);
         $stmt->bind_result($uid, $gm);
         $stmt->execute();
@@ -164,7 +164,7 @@ class Subject {
     }
 
     static function all() {
-        $stmt = conn()->prepare("SELECT id, game_id, url, name FROM `subject`");
+        $stmt = conn()->prepare('SELECT id, game_id, url, name FROM `subject`');
         $stmt->bind_result($id, $gid, $url, $name);
         $stmt->execute();
         $result = [];
@@ -176,7 +176,7 @@ class Subject {
     }
 
     static function by_id($id) {
-        $stmt = conn()->prepare("SELECT game_id, url, name FROM `subject` WHERE id = ?");
+        $stmt = conn()->prepare('SELECT game_id, url, name FROM `subject` WHERE id = ?');
         $stmt->bind_param('i', $id);
         $stmt->bind_result($gid, $url, $name);
         $stmt->execute();
@@ -190,7 +190,7 @@ class Subject {
     }
 
     static function by_url($game, $url) {
-        $stmt = conn()->prepare("SELECT id, name FROM `subject` WHERE game_id = ? AND url = ?");
+        $stmt = conn()->prepare('SELECT id, name FROM `subject` WHERE game_id = ? AND url = ?');
         $stmt->bind_param('is', $game->id, $url);
         $stmt->bind_result($id, $name);
         $stmt->execute();
@@ -198,11 +198,7 @@ class Subject {
         $result = new static($id, $game->id, $url, $name);
         $stmt->close();
         if (!$found) {
-            if (is_null($url)) {
-                throw new NotFoundException("Subject #$id not found.");
-            } else {
-                throw new NotFoundException("Subject not found ($var = $param).");
-            }
+            throw new NotFoundException("Subject not found ({$game->path}/$url).");
         }
         return $result;
     }
@@ -240,7 +236,7 @@ class Subject {
 
             default:
                 $caller = debug_backtrace()[0];
-                trigger_error("Invalid content type: '$type' in $caller['file'] on line $caller['line']", E_USER_ERROR);
+                trigger_error("Invalid content type: '$type' in {$caller['file']} on line {$caller['line']}", E_USER_ERROR);
                 return null;
         }
     }
@@ -335,11 +331,10 @@ class Revision {
     }
 
     function content() {
-        $hash = $this->hash;
-        if (is_null($hash)) {
+        if (is_null($this->hash)) {
             return '';
         } else {
-            return file_get_contents("$hash.txt");
+            return file_get_contents("{$this->hash}.txt");
         }
     }
 }
@@ -453,7 +448,7 @@ class User implements \JsonSerializable {
     }
 
     protected function load_games() {
-        $stmt = conn()->prepare("SELECT game_id, gm FROM `game_user` WHERE user_id = ?");
+        $stmt = conn()->prepare('SELECT game_id, gm FROM `game_user` WHERE user_id = ?');
         $stmt->bind_param('i', $this->id);
         $stmt->bind_result($gid, $gm);
         $stmt->execute();
