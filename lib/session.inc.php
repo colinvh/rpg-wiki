@@ -3,10 +3,10 @@
 require_once 'base.inc.php';
 
 function session($duration_sec) {
-    session_start();
-
     ini_set('session.cookie_lifetime', $duration_sec);
     ini_set('session.gc_maxlifetime', $duration_sec);
+
+    session_start();
 
     if (isset($_SESSION['last_activity']) && ($_SERVER['REQUEST_TIME'] - $_SESSION['last_activity']) > $duration_sec || !isset($_SESSION['last_activity'])) {
         session_unset();
