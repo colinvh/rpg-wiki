@@ -464,7 +464,7 @@ class User implements \JsonSerializable {
         $stmt->execute();
         $this->games = [];
         while ($stmt->fetch()) {
-            $this->games[] = [
+            $this->games[$gid] = [
                 'id' => $gid,
                 'role' => $gm ? 'gm' : 'player'
             ];
