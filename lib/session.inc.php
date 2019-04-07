@@ -2,20 +2,26 @@
 
 require_once 'base.inc.php';
 
-function session($duration_sec) {
-    ini_set('session.cookie_lifetime', $duration_sec);
-    ini_set('session.gc_maxlifetime', $duration_sec);
-
+function() {
     session_start();
 
-    if (isset($_SESSION['last_activity']) && ($_SERVER['REQUEST_TIME'] - $_SESSION['last_activity']) > $duration_sec || !isset($_SESSION['last_activity'])) {
-        session_unset();
-        session_destroy();
-        session_start();
+    $destroy = false;
+    if (isset($_SESSION['last_activity'])) {
+        if ($_SERVER['REQUEST_TIME'] - $_SESSION['last_activity'] > ini_get('session.cookie_lifetime')) {
+            $destroy = true;
+        }
+    } else {
+        if (!empty($_SESSION)) {
+            $destroy = true;
+        }
+    }
+    if ($destroy) {
+        $_SESSION = [];
+        session_regenerate_id(true);
     }
 
     $_SESSION['last_activity'] = $_SERVER['REQUEST_TIME'];
-}
+}();
 
 function session_ids() {
     $ids = [];
@@ -75,7 +81,5 @@ function expire_sessions($user_id) {
     session_id($orig_id);
     session_start();
 }
-
-session(3600 * 24); // 1 day
 
 ?>
