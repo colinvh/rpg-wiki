@@ -7,13 +7,19 @@ $user = User::require_login();
 
 if ($_SERVER['PATH_INFO']) {
 	$game = Game::from_path($_SERVER['PATH_INFO']);
-	$sub = Subject::from_path($_SERVER['PATH_INFO']);
+	$subj = Subject::from_path($_SERVER['PATH_INFO']);
+}
+
+if (isset($subj)) {
+	$title = $subj->name . ' | RPG Wiki';
+} else {
+	$title = 'Home | RPG Wiki';
 }
 
 ob_start();
 ?>
 HOME
 <?
-page([], head(), pheader(), ob_get_clean(), pfooter());
+page([], head(['title' => $title]), pheader(), ob_get_clean(), pfooter());
 
 ?>

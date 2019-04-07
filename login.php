@@ -53,6 +53,6 @@ ob_start();
     <? endif; ?>
 </form>
 <?
-page([], head(), pheader(), ob_get_clean(), pfooter());
+page([], head(['title' => 'RPG Wiki']), pheader(), ob_get_clean(), pfooter());
 
 ?>
