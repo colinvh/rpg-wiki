@@ -5,6 +5,7 @@ body {
 .grid-standard {
     display: grid;
     max-width: 900px;
+    margin: 0 auto;
     grid-template-columns: 25% 75%;
     grid-template-rows: 180px auto 100px;
 }

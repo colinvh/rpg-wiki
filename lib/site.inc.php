@@ -5,7 +5,8 @@ function page_std($meta=[], $head, $header, $sidebar, $contents, $footer) {
 <!DOCTYPE html>
 <html><head>
 <?=$head?>
-</head><body class="grid-standard">
+</head><body>
+<div class="grid-standard">
 <?=$header?>
 <?=$sidebar?>
 <div class="content">
@@ -15,6 +16,7 @@ function page_std($meta=[], $head, $header, $sidebar, $contents, $footer) {
 <? endforeach; ?>
 </div>
 <?=$footer?>
+</div>
 </body></html>
     <?
 }
