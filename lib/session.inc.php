@@ -2,12 +2,17 @@
 
 require_once 'base.inc.php';
 
+define('SESSION_DURATION_SEC', 60 * 60 * 24); // 1 day
+
 (function() {
+    ini_set('session.cookie_lifetime', SESSION_DURATION_SEC);
+    ini_set('session.gc_maxlifetime', SESSION_DURATION_SEC);
+
     session_start();
 
     $destroy = false;
     if (isset($_SESSION['last_activity'])) {
-        if ($_SERVER['REQUEST_TIME'] - $_SESSION['last_activity'] > ini_get('session.cookie_lifetime')) {
+        if ($_SERVER['REQUEST_TIME'] - $_SESSION['last_activity'] > SESSION_DURATION_SEC) {
             $destroy = true;
         }
     } else {
