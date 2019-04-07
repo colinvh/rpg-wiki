@@ -1,6 +1,6 @@
 <?
 
-require_once 'credentials.inc.php'
+require_once 'credentials.inc.php';
 
 function conn() {
     static $conn;
