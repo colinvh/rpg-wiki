@@ -2,7 +2,7 @@
 
 require_once 'base.inc.php';
 
-function() {
+(function() {
     session_start();
 
     $destroy = false;
@@ -21,7 +21,7 @@ function() {
     }
 
     $_SESSION['last_activity'] = $_SERVER['REQUEST_TIME'];
-}();
+})();
 
 function session_ids() {
     $ids = [];
