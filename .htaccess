@@ -1,4 +1,4 @@
-# Header always set Content-Security-Policy "upgrade-insecure-requests;"
+Header always set Content-Security-Policy "upgrade-insecure-requests;"
 
 DirectoryIndex index.php index.html
 
