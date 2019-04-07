@@ -5,7 +5,7 @@ require_once 'lib/site.inc.php';
 
 $user = User::require_login();
 
-if ($_SERVER['PATH_INFO']) {
+if (isset($_SERVER['PATH_INFO'])) {
 	$game = Game::from_path($_SERVER['PATH_INFO']);
 	$subj = Subject::from_path($_SERVER['PATH_INFO']);
 }
