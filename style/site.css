@@ -1,0 +1,16 @@
+body {
+    font-family: sans-serif;
+}
+
+.main {
+    max-width: 900px;
+    margin: .5em auto;
+}
+
+.site-head {
+    max-width: 900px;
+    margin: 1em auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}

@@ -14,14 +14,21 @@ if (isset($_SERVER['PATH_INFO'])) {
 ob_start();
 if (isset($subj)) {
     $title = $subj->name . ' | RPG Wiki';
+    ?>
+<div class="subject main">
+    <?
     if ($user->games[$game->id]['role'] == 'gm') {
         echo $subj->content('gmpriv');
     }
     echo $subj->content('gmpub');
     echo $subj->content('plr');
+    ?>
+</div>
+    <?
 } else {
     $title = 'Home | RPG Wiki';
     ?>
+<div class="index main">
 <h1>Your Games</h1>
 <ul>
     <? foreach ($user->games as $game_arr): ?>
@@ -29,6 +36,7 @@ if (isset($subj)) {
         <li><a href="<?=$game->url()?>"><?=$game->name?></a> (<?=$game_arr['role']?>)</li>
     <? endforeach; ?>
 </ul>
+</div>
     <?
 }
 page([], head(['title' => $title]), pheader(), ob_get_clean(), pfooter());
