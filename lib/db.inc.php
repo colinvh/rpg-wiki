@@ -1,13 +1,10 @@
 <?
 
+require_once 'credentials.inc.php'
+
 function conn() {
     static $conn;
-    static $conf = [
-        'server' => 'localhost',
-        'db' => 'rpg_wiki',
-        'user' => 'rpg_wiki',
-        'pass' => '***********'
-    ];
+    $conf = db_conf();
 
     if (!isset($conn)) {
         $conn = new mysqli($conf['server'], $conf['user'], $conf['pass'], $conf['db']);
