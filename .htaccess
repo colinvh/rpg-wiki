@@ -16,14 +16,19 @@ RewriteBase /
 # RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
 # RewriteRule ^ https://www.%1%{REQUEST_URI} [L,NE,R=301]
 
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME}\.php -f
-RewriteRule ^(.*)$ $1.php
-
-RedirectMatch 404 ^/lib(/|$)
-<If "-z %{ENV:REDIRECT_STATUS}">
-    RedirectMatch 404 ^/err(/|$)
-</If>
+RewriteCond %{REQUEST_FILENAME} ^/(lib|vendor)(/|$)
+RewriteRule . - [L,R=404]
+RewriteCond %{REQUEST_FILENAME} ^/err(/|$)
+RewriteCond %{ENV:REDIRECT_STATUS} !.
+RewriteRule . - [L,R=404]
+# RedirectMatch 404 ^/lib(/|$)
+# <If "-z %{ENV:REDIRECT_STATUS}">
+#     RedirectMatch 404 ^/err(/|$)
+# </If>
 
 ErrorDocument 403 /err/403.php
 ErrorDocument 404 /err/404.php
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php
