@@ -457,7 +457,7 @@ class User implements \JsonSerializable {
         $this->password = $password;
     }
 
-    protected function load_games() {
+    function load_games() {
         $stmt = conn()->prepare('SELECT game_id, gm FROM `game_user` WHERE user_id = ?');
         $stmt->bind_param('i', $this->id);
         $stmt->bind_result($gid, $gm);
