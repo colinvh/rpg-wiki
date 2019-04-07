@@ -1,15 +1,20 @@
 <?
-function page($meta=[], $head, ...$contents) {
+function page_std($meta=[], $head, $header, $sidebar, $contents, $footer) {
     header('Content-Type: text/html; charset=utf-8');
     ?>
 <!DOCTYPE html>
 <html><head>
 <?=$head?>
-</head><body<? if (isset($meta['body-classes'])) echo ' class="'.$meta['body-classes'].'"'; ?>>
+</head><body class="grid-standard">
+<?=$header?>
+<?=$sidebar?>
+<div class="content">
 <? foreach ($contents as $c): ?>
     <?=$c?>
 
 <? endforeach; ?>
+</div>
+<?=$footer?>
 </body></html>
     <?
 }
@@ -42,15 +47,33 @@ function head($meta=[], ...$contents) {
 }
 
 function pheader() {
-    global $user;
     ob_start();
     ?>
+<div class="header">
+HEAD
+</div>
+    <?
+    return ob_get_clean();
+}
+
+function psidebar() {
+    ob_start();
+    ?>
+<div class="sidebar">
+SIDE
+</div>
     <?
     return ob_get_clean();
 }
 
 function pfooter() {
-    return '';
+    ob_start();
+    ?>
+<div class="footer">
+FOOT
+</div>
+    <?
+    return ob_get_clean();
 }
 
 ?>

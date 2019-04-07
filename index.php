@@ -39,6 +39,6 @@ if (isset($subj)) {
 </div>
     <?
 }
-page([], head(['title' => $title]), pheader(), ob_get_clean(), pfooter());
+page_std([], head(['title' => $title]), pheader(), psidebar(), [ob_get_clean()], pfooter());
 
 ?>

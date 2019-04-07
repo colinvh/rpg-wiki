@@ -2,6 +2,25 @@ body {
     font-family: sans-serif;
 }
 
+.grid-standard {
+    display: grid;
+    max-width: 900px;
+    grid-template-columns: 25% 75%;
+    grid-template-rows: 180px auto 100px;
+}
+.grid-standard>.header {
+    grid-area: 1 / 1 / 2 / 3;
+}
+.grid-standard>.sidebar {
+    grid-area: 2 / 1 / 3 / 2;
+}
+.grid-standard>.content {
+    grid-area: 2 / 2 / 3 / 3;
+}
+.grid-standard>.footer {
+    grid-area: 3 / 1 / 4 / 3;
+}
+
 .main {
     max-width: 900px;
     margin: .5em auto;
