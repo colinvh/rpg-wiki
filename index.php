@@ -28,7 +28,7 @@ if (isset($subj)) {
 } else {
     $title = 'Home | RPG Wiki';
     ?>
-<div class="index main">
+<div class="index">
 <h1>Your Games</h1>
 <ul>
     <? foreach ($user->games as $game_arr): ?>
