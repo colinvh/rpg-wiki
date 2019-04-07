@@ -446,6 +446,7 @@ class User implements \JsonSerializable {
     public $admin;
     public $nickname;
     public $email;
+    public $games = [];
     protected $password;
 
     protected function __construct($id, $name, $admin, $nickname, $email, $password) {
@@ -462,7 +463,6 @@ class User implements \JsonSerializable {
         $stmt->bind_param('i', $this->id);
         $stmt->bind_result($gid, $gm);
         $stmt->execute();
-        $this->games = [];
         while ($stmt->fetch()) {
             $this->games[$gid] = [
                 'id' => $gid,
