@@ -19,10 +19,10 @@ CREATE TABLE game_user (
 CREATE TABLE subject (
     id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     game_id int(10) UNSIGNED NOT NULL COMMENT 'FK game.id',
-    path varchar(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    url varchar(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     name text NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY `UNIQUE` (path) USING BTREE
+    UNIQUE KEY `UNIQUE` (url) USING BTREE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE revision (
@@ -30,6 +30,7 @@ CREATE TABLE revision (
     subj_id int(10) UNSIGNED NOT NULL COMMENT 'FK subject.id',
     type ENUM('gmpriv', 'gmpub', 'plr'),
     date timestamp,
+    author int(10) UNSIGNED NOT NULL COMMENT 'FK user.id',
     hash char(64) COLLATE ascii_bin,
     PRIMARY KEY (id)
 ) ENGINE=MyISAM DEFAULT CHARSET=ascii;
@@ -46,6 +47,16 @@ CREATE TABLE user (
     UNIQUE KEY UNIQUE_email (email) USING BTREE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+CREATE TABLE auth_code (
+  id int(10) NOT NULL AUTO_INCREMENT,
+  code varchar(50) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  expires datetime NOT NULL,
+  auth text CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY `UNIQUE` (code),
+  KEY `INDEX` (expires) USING BTREE
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 CREATE VIEW head AS
-    SELECT id, subj_id, type, date, hash FROM revision
+    SELECT id, subj_id, type, date, author, hash FROM revision
     WHERE id IN (SELECT max(id) FROM revision GROUP BY subj_id, type);

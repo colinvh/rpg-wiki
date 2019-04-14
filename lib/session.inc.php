@@ -30,11 +30,20 @@ define('SESSION_DURATION_SEC', 60 * 60 * 24); // 1 day
 
 function session_ids() {
     $ids = [];
-    $files = scandir(session_save_path());
-    foreach ($files as $file) {
+    $path = session_save_path();
+    $uid = posix_getuid();
+    foreach (scandir($path) as $file) {
         $id = str_replace("sess_", "", $file);
         if (strpos($id, ".") === false) {
-            $ids[] = $id;
+            try {
+                if (fileowner("$path/$file") == $uid) {
+                    // if (is_writable("$path/$file")) {
+                        $ids[] = $id;
+                    // }
+                }
+            } catch (ErrorException $ex) {
+                ;
+            }
         }
     }
     return $ids;
@@ -67,6 +76,7 @@ function replace_session_data($id, $data) {
 }
 
 function expire_sessions($user_id) {
+    return;
     $orig_id = session_id();
     session_abort();
     foreach (session_ids() as $id) {
@@ -74,13 +84,19 @@ function expire_sessions($user_id) {
             continue;
         }
         session_id($id);
-        session_start(['use_cookies' => false,
-                       'use_only_cookies' => true]);
-        // header_remove("Set-Cookie");
-        if (isset($_SESSION['user']) && $_SESSION['user'] == $user_id) {
-            session_destroy();
-        } else {
-            session_abort();
+        try {
+            session_start(['use_cookies' => false,
+                           'use_only_cookies' => true]);
+            if (isset($_SESSION['user']) && $_SESSION['user'] == $user_id) {
+                session_destroy();
+            } else {
+                session_abort();
+            }
+        } catch (ErrorException $ex) {
+            $message = $ex->getMessage();
+            if (substr($message, -22) != 'Permission denied (13)') {
+                error_log($message);
+            }
         }
     }
     session_id($orig_id);

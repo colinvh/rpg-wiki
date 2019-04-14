@@ -1,23 +1,26 @@
 <?
 require_once 'lib/session.inc.php';
+require_once 'lib/User.class.php';
 require_once 'lib/site.inc.php';
-require_once 'lib/db.inc.php';
 
 if (isset($_POST['location'])) {
-    $location = $_POST['location'];
+    $loc_url = $location = $_POST['location'];
 } elseif (isset($_GET['location'])) {
-    $location = $_GET['location'];
+    $loc_url = $location = $_GET['location'];
 } else {
-    $location = '/';
+    $location = '';
+    $loc_url = '/';
 }
+
+$name = isset($_POST['name']) ? $_POST['name'] : '';
+$admin_err = isset($_GET['admin_err']) ? $_GET['admin_err'] : '';
 
 $logged_in = false;
 if (isset($_POST['name']) && isset($_POST['password'])) {
     $user = User::load(['name' => $_POST['name']]);
     if ($user->check_password($_POST['password'])) {
         $_SESSION['user'] = $user->id;
-        header('Location: ' . $location);
-        exit();
+        respond_redirect($loc_url);
     } else {
         $error = true;
         $logged_in = false;
@@ -26,15 +29,20 @@ if (isset($_POST['name']) && isset($_POST['password'])) {
     $error = false;
     $user = User::from_session();
     $logged_in = (bool) $user;
+    if ($logged_in && $location) {
+        if (!$user->admin == !$admin_err) {
+            respond_redirect($loc_url);
+        }
+    }
 }
-
-$name = isset($_POST['name']) ? $_POST['name'] : '';
-$admin_err = isset($_GET['admin_err']) ? $_GET['admin_err'] : '';
 
 ob_start();
 ?>
-<form class="main login" method="POST">
-    <input type="hidden" name="location" value="<?=$location?>">
+<form class="login" method="POST">
+    <h1>Log In</h1>
+    <? if ($location): ?>
+        <input type="hidden" name="location" value="<?=$location?>">
+    <? endif; ?>
     <? if ($admin_err): ?>
         <div class="result error">Administrator access required.</div>
     <? endif; ?>
@@ -48,11 +56,11 @@ ob_start();
     <input type="password" name="password" placeholder="password" required>
     <input type="submit" value="Log In">
     <? if (!$logged_in): ?>
-        <div><a href="/create-account">Create account</a></div>
+        <div><a href="/user/_new">Create account</a></div>
         <div><a href="/forgot-password">Forgot username or password?</a></div>
     <? endif; ?>
 </form>
 <?
-page([], head(['title' => 'RPG Wiki']), pheader(), ob_get_clean(), pfooter());
+page_std([], head(['title' => 'RPG Wiki']), pheader(), psidebar(), [ob_get_clean()], pfooter());
 
 ?>

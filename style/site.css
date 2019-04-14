@@ -2,24 +2,113 @@ body {
     font-family: sans-serif;
 }
 
+a {
+    text-decoration: none;
+}
+
+.templates {
+    display: none;
+}
+
 .grid-standard {
+    min-height: 100vh;
     display: grid;
-    max-width: 900px;
-    margin: 0 auto;
-    grid-template-columns: 25% 75%;
-    grid-template-rows: 180px auto 100px;
+    grid-template-columns: 160px auto;
+    grid-template-rows: 3em auto 3em;
 }
 .grid-standard>.header {
-    grid-area: 1 / 1 / 2 / 3;
+    grid-area: 1 / 2 / 2 / 3;
+    padding-top: .75em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 13px;
+    /*font-size: .8em;*/
 }
 .grid-standard>.sidebar {
-    grid-area: 2 / 1 / 3 / 2;
+    grid-area: 1 / 1 / 4 / 2;
+    font-size: 13px;
+    /*font-size: .8em;*/
 }
 .grid-standard>.content {
     grid-area: 2 / 2 / 3 / 3;
+    border-left: 1px solid #AB1212;
+    padding: 0 .5em;
+    font-size: 15px;
 }
 .grid-standard>.footer {
-    grid-area: 3 / 1 / 4 / 3;
+    grid-area: 3 / 2 / 4 / 3;
+    border-top: 1px solid #AB1212;
+    font-size: 13px;
+    /*font-size: .8em;*/
+}
+body.standard {
+    background-image: linear-gradient(white 1.5em, #F6F6F6 3em);
+}
+
+.header .links {
+    display: flex;
+    align-items: flex-end;
+}
+.header .links>*:first-child {
+    border-left-style: solid;
+    border-left-width: 1px;
+}
+.header .links:after {
+    content: '';
+    width: 100%;
+    border-bottom: 1px solid #AB1212;
+}
+.header .links>.active, .header .links>.link {
+    border-right-style: solid;
+    border-image: linear-gradient(white, #AB1212) 1 100%;
+    border-right-width: 1px;
+}
+.header .links>.active {
+    background-color: white;
+}
+.header .links>.active>div {
+    border-bottom: 1px solid white;
+}
+.header .links>.link {
+    background-image: linear-gradient(rgba(255, 255, 255, 0), #E5E5E5 3em);
+}
+.header .links>.link>a {
+    display: block;
+    border-bottom: 1px solid #AB1212;
+}
+.header .links>.active>div, .header .links>.link>a {
+    padding: .25em .5em;
+}
+
+.header .user {
+    align-self: flex-end;
+    /*text-align: right;*/
+    /*margin: .5em 0 0;*/
+}
+.header .user>a, .header .user>span {
+    margin: 0 1em 0 0;
+}
+
+.sidebar .logo {
+    display: block;
+    width: 150px;
+    margin: .5em auto;
+}
+.sidebar .beta {
+    text-align: center;
+    font-weight: bold;
+    color: #AB1212;
+    font-style: oblique;
+}
+.sidebar ul {
+    margin: 1em 1em;
+    padding: 0;
+    list-style: none;
+}
+
+.content {
+    background-color: white;
 }
 
 .main {
@@ -28,9 +117,104 @@ body {
 }
 
 .site-head {
-    max-width: 900px;
-    margin: 1em auto;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+}
+
+.result {
+    width: max-content;
+    border: 1px solid DarkGreen;
+    border-radius: 4px;
+    background-color: Honeydew;
+    margin: .5em 0;
+    padding: .5em;
+}
+.result.error {
+    border-color: DarkRed;
+    background-color: LightCoral;
+}
+.result.not-result {
+    display: none;
+}
+
+.login {
+    margin-left: 2em;
+}
+.login>* {
+    display: block;
+}
+
+.forgot-password form>* {
+    display: block;
+}
+
+.subject.edit {
+    margin: 1em 0;
+}
+.subject.edit>* {
+    display: block;
+}
+.subject.edit>label {
+    display: flex;
+    width: 15.5em;
+    height: 1.75em;
+    justify-content: space-between;
+    align-items: center;
+}
+.subject.edit textarea {
+    width: 100%;
+    height: 45vh;
+}
+
+.game.edit {
+    margin: 1em 0;
+}
+.game.edit>select.master {
+    display: none;
+}
+.game.edit>* {
+    display: block;
+}
+.game.edit>label {
+    display: flex;
+    width: 15.5em;
+    justify-content: space-between;
+    align-items: center;
+}
+.game.edit>label.article {
+    width: 21em;
+}
+.game.edit>label input {
+    width: 12em;
+}
+.game.edit>label, .game.edit div.user, .game.edit a.new {
+    height: 1.75em;
+}
+.game.edit textarea {
+    width: 100%;
+    height: 45vh;
+}
+.game.edit a.del {
+    color: red;
+}
+.game.edit a.new i.fas {
+    color: green;
+}
+
+.user.edit {
+    margin: 1em 0 0 2em;
+}
+.user.edit>* {
+    display: block;
+}
+.user.edit>label {
+    display: flex;
+    height: 1.75em;
+    width: 18em;
+    justify-content: space-between;
+    align-items: center;
+}
+.user.edit>label input {
+    width: 12em;
 }
