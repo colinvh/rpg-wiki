@@ -1,2 +1,4 @@
 lib/credentials.inc.php
 revs/*
+upload/*
+upload-pending/*

@@ -1,6 +1,8 @@
 <?
 require_once 'credentials.inc.php';
 
+define('DATEFMT_MYSQL', 'Y-m-d H:i:s');
+
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
     throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
 });
@@ -34,11 +36,7 @@ function exit_clean() {
 function db_conn() {
     static $conn;
     if (!isset($conn)) {
-        $conf = db_conf();
-        $conn = new mysqli($conf['server'], $conf['user'], $conf['pass'], $conf['db']);
-        if ($conn->connect_errno) {
-            die("Connection failed: " . $conn->connect_error);
-        }
+        $conn = db_conf();
         $conn->set_charset('utf8');
 
         $driver = new mysqli_driver();

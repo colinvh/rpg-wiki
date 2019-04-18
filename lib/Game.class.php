@@ -97,6 +97,19 @@ class Game {
         }
     }
 
+    static function url_from_id($id) {
+        $stmt = db_conn()->prepare('SELECT url FROM `game` WHERE id = ?');
+        $stmt->bind_param('i', $id);
+        $stmt->bind_result($url);
+        $stmt->execute();
+        $found = $stmt->fetch();
+        $stmt->close();
+        if (!$found) {
+            throw new NotFoundException("Game not found (id = '$id').");
+        }
+        return $url;
+    }
+
     protected function __construct($id, $url, $name, $sid=0) {
         $this->id = $id;
         $this->_url = $url;
@@ -224,11 +237,9 @@ class Game {
 
     function art_url($art='') {
         if ($art) {
-            $sep = '/';
-        } else {
-            $sep = '';
+            $art = "/$art";
         }
-        return "/art/{$this->_url}$sep$art";
+        return "/art/{$this->_url}$art";
     }
 }
 

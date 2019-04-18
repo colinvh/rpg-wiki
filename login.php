@@ -1,7 +1,5 @@
 <?
-require_once 'lib/session.inc.php';
-require_once 'lib/User.class.php';
-require_once 'lib/site.inc.php';
+require_once 'lib/main.inc.php';
 
 if (isset($_POST['location'])) {
     $loc_url = $location = $_POST['location'];

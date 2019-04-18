@@ -1,5 +1,4 @@
 <?
-
 require_once 'base.inc.php';
 
 define('SESSION_DURATION_SEC', 60 * 60 * 24); // 1 day

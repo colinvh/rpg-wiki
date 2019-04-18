@@ -1,9 +1,7 @@
 <?
-require_once 'lib/session.inc.php';
+require_once 'lib/main.inc.php';
 require_once 'lib/Game.class.php';
 require_once 'lib/Subject.class.php';
-require_once 'lib/User.class.php';
-require_once 'lib/site.inc.php';
 
 $user = User::require_login();
 
@@ -42,7 +40,6 @@ if (isset($_SERVER['PATH_INFO'])) {
             respond_err(404);
         }
         $subj = Subject::by_id($game->subj_id);
-        $head[] = simplemde();
     }
 
     if ($verb) {
@@ -115,12 +112,9 @@ if (!$user->admin) {
     }
 }
 
-if ($subj) {
-    $links['Home'] = $subj->url();
-}
-
 ob_start();
 ?>
+<script src="/scripts/editor.js"></script>
 <script>
 function select_vals() {
     var vals = {};
@@ -184,6 +178,8 @@ $(function() {
 <?
 $head[] = ob_get_clean();
 
+$head[] = ace_head();
+
 ob_start();
 ?>
 <div class="templates">
@@ -209,8 +205,8 @@ ob_start();
         <? else: ?>
             <h1>New Game</h1>
         <? endif; ?>
-        <label class="input-name">Name <input type="text" name="name" value="<?=$game?htmlspecialchars($game->name):''?>"></label>
-        <label class="input-url">URL <input type="text" name="url" value="<?=$game?htmlspecialchars($game->_url):''?>"></label>
+        <label>Name <input type="text" name="name" value="<?=$game?htmlspecialchars($game->name):''?>"></label>
+        <label>URL <input type="text" name="url" value="<?=$game?htmlspecialchars($game->_url):''?>"></label>
         <div class="users">
             <?
             if ($game) {
@@ -237,11 +233,12 @@ ob_start();
             <label class="article">Home Article URL <input type="text" name="art-url" required value="<?=$subj->_url?>"></label>
         <? else: ?>
             <h2>Home Article</h2>
-            <label>Name <input type="text" name="art-name" required></label>
-            <label>URL <input type="text" name="art-url" required></label>
+            <label class="input-name">Name <input type="text" name="art-name" required></label>
+            <label class="input-url">URL <input type="text" name="art-url" required></label>
             <label>GM-Public Section</label>
-            <div><textarea name="art-gmpub" class="markdown" required></textarea></div>
-            <a href="https://daringfireball.net/projects/markdown/syntax">Markdown formatting guide</a>
+            <input type="hidden" name="gmpub">
+            <div class="editor gmpub"></div>
+            <a href="https://asciidoctor.org/docs/asciidoc-syntax-quick-reference/" target="_blank">Asciidoc formatting guide</a>
         <? endif; ?>
         <input type="submit" value="<?=$verb=='_new'?'Create':'Update'?>">
     </form>
@@ -249,6 +246,8 @@ ob_start();
     <? if ($game): ?>
         <div class="game">
         <h1><?=htmlspecialchars($game->name)?></h1>
+        <h2><a href="<?=$subj->url()?>">Home Page</a></h2>
+        <h2><a href="<?=$game->art_url()?>">Article index</a></h2>
         <h2>Participants</h2>
         <ul>
             <? foreach ($players as $u): ?>
@@ -279,6 +278,8 @@ ob_start();
 <? endif; ?>
 <?
 $body[] = ob_get_clean();
+
+$body[] = ace_end();
 
 page_std([], head(['title' => $title], ...$head), pheader($links), psidebar(), $body, pfooter());
 

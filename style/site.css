@@ -2,6 +2,10 @@ body {
     font-family: sans-serif;
 }
 
+h1 {
+    margin-bottom: .5em;
+}
+
 a {
     text-decoration: none;
 }
@@ -18,7 +22,7 @@ a {
 }
 .grid-standard>.header {
     grid-area: 1 / 2 / 2 / 3;
-    padding-top: .75em;
+    padding-top: .25em;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -79,12 +83,27 @@ body.standard {
 }
 .header .links>.active>div, .header .links>.link>a {
     padding: .25em .5em;
+    white-space: nowrap;
+}
+.header .link .fa-location-arrow, .header .link .fa-download {
+    display: inline;
+}
+.header .link .fa-location-arrow {
+    position: relative;
+    top: -.1em;
+    font-size: .8em;
 }
 
-.header .user {
+.header .top-right {
     align-self: flex-end;
     /*text-align: right;*/
     /*margin: .5em 0 0;*/
+}
+.header .search, .header .user {
+    display: inline-block;
+}
+.header .search {
+    margin-right: 1em;
 }
 .header .user>a, .header .user>span {
     margin: 0 1em 0 0;
@@ -124,6 +143,8 @@ body.standard {
 
 .result {
     width: max-content;
+    width: -moz-max-content;
+    width: -webkit-max-content;
     border: 1px solid DarkGreen;
     border-radius: 4px;
     background-color: Honeydew;
@@ -149,6 +170,50 @@ body.standard {
     display: block;
 }
 
+/*.subject.view table, .subject.view th, .subject.view td {
+    border: 1px solid #CCC;
+    border-collapse: collapse;
+}*/
+.subject.view table {
+    border-spacing: 0;
+}
+.subject.view tbody tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+/*.subject.view th {
+    background-color: #EEE;
+}
+.subject.view td {
+}*/
+.subject.view th, .subject.view td {
+    padding: .2em .5em;
+}
+.subject.view th {
+    text-align: left;
+}
+.subject.view table caption {
+    margin-top: 1em;
+    margin-bottom: .33em;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: left;
+}
+.subject.view p.tableblock {
+    margin: 0;
+}
+.subject.view li>p {
+    margin-top: 0;
+    margin-bottom: .5em;
+}
+.subject.view section>h2 {
+    border-top: 1px solid #CCC;
+    padding-top: .75em;
+}
+.subject.view section:first-of-type>h2 {
+    border-top: none;
+    padding-top: 0;
+}
+
 .subject.edit {
     margin: 1em 0;
 }
@@ -162,9 +227,12 @@ body.standard {
     justify-content: space-between;
     align-items: center;
 }
-.subject.edit textarea {
+.subject.edit .editor, .game.edit .editor {
     width: 100%;
     height: 45vh;
+    border: 1px solid #CCC;
+    /*font-family: Consolas;
+    font-size: .8em;*/
 }
 
 .game.edit {
@@ -217,4 +285,30 @@ body.standard {
 }
 .user.edit>label input {
     width: 12em;
+}
+
+.file {
+    margin: 1em 0 0 2em;
+}
+.file.edit>* {
+    display: block;
+}
+
+.http-error {
+    margin: 1em 0 0 19px;
+}
+.http-error>* {
+    margin-left: 11px;
+}
+.http-error h2 {
+    width: max-content;
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    margin-left: 0;
+    padding: 8px 10px;
+    border: solid 1px black;
+    border-radius: 4px;
+    font-size: 1.1em; /* standard=1.5em */
+    color: white;
+    background-color: DarkRed;
 }

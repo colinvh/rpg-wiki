@@ -5,8 +5,14 @@ require_once 'lib/Game.class.php';
 // require_once 'vendor/Netcarver/Textile/Parser.php';
 // require_once 'vendor/Netcarver/Textile/DataBag.php';
 // require_once 'vendor/Netcarver/Textile/Tag.php';
-require_once 'vendor/htmlpurifier/library/HTMLPurifier.auto.php';
+// require_once 'vendor/htmlpurifier/library/HTMLPurifier.auto.php';
 require_once 'vendor/cebe/markdown/autoload.php';
+// require_once 'vendor/wikirenderer/src/WikiRenderer.lib.php';
+// require_once 'vendor/wikirenderer/src/rules/phpwiki_to_dokuwiki.php';
+// require_once 'vendor/wikirenderer/src/rules/dokuwiki_to_xhtml.php';
+// require_once 'vendor/mediawiki/includes/WebStart.php';
+// require_once 'vendor/mediawiki/includes/parser/ParserOptions.php';
+require_once 'vendor/creole/autoload.php';
 
 // use Gregwar\RST\Parser;
 
@@ -37,9 +43,10 @@ class Subject {
         return $result;
     }
 
-    static function all() {
-        $stmt = db_conn()->prepare('SELECT id, game_id, url, name FROM `subject` WHERE deleted = 0');
-        $stmt->bind_result($id, $gid, $url, $name);
+    static function all($gid) {
+        $stmt = db_conn()->prepare('SELECT id, url, name FROM `subject` WHERE game_id = ?'); // AND deleted = 0
+        $stmt->bind_param('i', $gid);
+        $stmt->bind_result($id, $url, $name);
         $stmt->execute();
         $result = [];
         while ($stmt->fetch()) {
@@ -50,6 +57,49 @@ class Subject {
             $res->load_heads();
         }
         return $result;
+    }
+
+    static function search($gid, $gm, $search) {
+        $terms = preg_split('/\s+/', $search);
+        $result = [];
+        $all = static::all($gid);
+        foreach ($all as $subj) {
+            if (static::_search($subj, $gm, $terms)) {
+                $result[] = $subj;
+            }
+        }
+        return $result;
+    }
+
+    static function _search($subj, $gm, $terms) {
+        foreach ($terms as $t) {
+            if (static::word_prefix_match($subj->name, $t)) {
+                return true;
+            }
+        }
+        $types = [];
+        if ($gm) {
+            $types[] = 'gmpriv';
+        }
+        $types[] = 'gmpub';
+        $types[] = 'plr';
+        foreach ($types as $type) {
+            $content = $subj->heads[$type]->editor_content();
+            foreach ($terms as $t) {
+            if (static::word_prefix_match($content, $t)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    static function word_prefix_match($content, $word) {
+        // errlog($word);
+        $clean = preg_quote($word);
+        // errlog($clean);
+        $pattern = "/\b$clean/";
+        // errlog($pattern)
+        return preg_match($pattern, $content);
     }
 
     static function by_id($id) {
@@ -113,7 +163,7 @@ class Subject {
 
     static function url_from_id($id) {
         $stmt = db_conn()->prepare('SELECT url FROM `subject` WHERE id = ?');
-        $stmt->bind_param('is', $id);
+        $stmt->bind_param('i', $id);
         $stmt->bind_result($url);
         $stmt->execute();
         $found = $stmt->fetch();
@@ -130,6 +180,16 @@ class Subject {
                 throw new InvalidURLException("Reserved URL: path segment cannot begin with '_'");
             }
         }
+    }
+
+    static function make_url($gid, $_url) {
+        static $cache = [];
+        if (isset($cache[$gid])) {
+            $game_url = $cache[$gid];
+        } else {
+            $game_url = $cache[$gid] = Game::url_from_id($gid);
+        }
+        return "/art/$game_url/$_url";
     }
 
     public $id;
@@ -156,17 +216,17 @@ class Subject {
 
     function update_content($new) {
         if (isset($new['gmpriv'])) {
-            if ($new['gmpriv'] != $this->heads['gmpriv']->content()) {
+            if ($new['gmpriv'] != $this->heads['gmpriv']->editor_content()) {
                 $this->heads['gmpriv'] = Revision::create($this, 'gmpriv', $new['gmpriv']);
             }
         }
         if (isset($new['gmpub'])) {
-            if ($new['gmpub'] != $this->heads['gmpub']->content()) {
+            if ($new['gmpub'] != $this->heads['gmpub']->editor_content()) {
                 $this->heads['gmpub'] = Revision::create($this, 'gmpub', $new['gmpub']);
             }
         }
         if (isset($new['plr'])) {
-            if ($new['plr'] != $this->heads['plr']->content()) {
+            if ($new['plr'] != $this->heads['plr']->editor_content()) {
                 $this->heads['plr'] = Revision::create($this, 'plr', $new['plr']);
             }
         }
@@ -200,69 +260,6 @@ class Subject {
         }
     }
 
-    function set_content($type, $content) {
-        switch ($type) {
-            case 'gmpriv':
-            case 'gmpub':
-            case 'plr':
-                if ($this->heads[$type]->content() != $content) {
-                    $this->heads[$type] = Revision::create($this, $type, $content);
-                }
-                return;
-
-            default:
-                $caller = debug_backtrace()[0];
-                trigger_error("Invalid content type: '$type' in {$caller['file']} on line {$caller['line']}", E_USER_ERROR);
-                return null;
-        }
-    }
-
-    function html_content_rst($type) {
-        static $parser = null;
-        if (!$parser) {
-            $parser = new Gregwar\RST\Parser();
-        }
-        return $parser->parse($this->content($type));
-    }
-
-    function html_content_textile($type) {
-        static $parser = null;
-        if (!$parser) {
-            $parser = new \Netcarver\Textile\Parser();
-            $parser->setDocumentType('html5');
-            $parser->setRestricted(true);
-        }
-        return $parser->parse($this->content($type));
-    }
-
-    function html_content($type) {
-        static $purifier = null;
-        static $parser = null;
-        if (!$purifier) {
-            $config = HTMLPurifier_Config::createDefault();
-            $config->set('HTML.AllowedElements', [
-                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                'hr',
-                'pre', 'code',
-                'blockquote',
-                'table', 'tr', 'td', 'th', 'thead', 'tbody',
-                'strong', 'em', 'b', 'i', 'u', 's', 'span',
-                'a', 'p', 'br', #'nobr',
-                'ul', 'ol', 'li',
-                'img',
-            ]);
-            $config->set('HTML.AllowedAttributes', ['th.align', 'td.align', 'ol.start', 'code.class', 'img.src']);
-            $purifier = new HTMLPurifier($config);
-        }
-        if (!$parser) {
-            $parser = new \cebe\markdown\Markdown();
-            $parser->html5 = true;
-            $parser->keepListStartNumber = true;
-        }
-        $clean = $purifier->purify($this->content($type));
-        return $parser->parse($clean);
-    }
-
     function update($new) {
         if (is_null($this->id)) {
             static::create($this->game_id, $new, $this);
@@ -282,6 +279,7 @@ class Subject {
         $stmt->bind_param('issi', $this->game_id, $this->_url, $this->name, $this->id);
         $stmt->execute();
         $stmt->close();
+        $this->update_content($new);
     }
 
     function delete() {
@@ -299,8 +297,11 @@ class Subject {
     }
 
     function url() {
-        $game = Game::load(['id' => $this->game_id]);
-        return $game->art_url($this->_url);
+        if (isset($this->game)) {
+            return $this->game->art_url($this->_url);
+        } else {
+            return static::make_url($this->game_id, $this->_url);
+        }
     }
 }
 
@@ -314,11 +315,9 @@ class Revision {
             if (isset($subj->game)) {
                 $game = $subj->game;
             } else {
-                $game = Game::by_id($subj->game_id);
+                $game = Game::load(['id' => $subj->game_id]);
             }
-            errlog($content);
             $content = preg_replace_callback(LINK_REGEX, function($match) use ($game) {
-                errlog($match);
                 $title = $match[1];
                 if ($title) {
                     $title .=  '|';
@@ -326,7 +325,6 @@ class Revision {
                 $subj = Subject::by_url($game, '//' . $match[2]);
                 return '{{'."$title{$subj->id}}}";
             }, $content);
-            errlog($content);
             $hash = hash('sha256', $content);
             $path = static::path($hash);
             if (!file_exists($path)) {
@@ -336,7 +334,7 @@ class Revision {
         $stmt = $conn->prepare('INSERT INTO `revision` (subj_id, type, author, hash) VALUES (?, ?, ?, ?)');
         $stmt->bind_param('isis', $subj->id, $type, $user->id, $hash);
         $stmt->execute();
-        $result = new static($conn->insert_id, $subj->id, $type, $user->id, date('Y-m-d H:i:s'), $hash);
+        $result = new static($conn->insert_id, $subj->id, $type, $user->id, date(DATEFMT_MYSQL), $hash);
         $stmt->close();
         return $result;
     }
@@ -376,7 +374,7 @@ class Revision {
     }
 
     static function by_subject($sid) {
-        $stmt = db_conn()->prepare('SELECT id, type, date, author, hash FROM `revision` WHERE subj_id = ?');
+        $stmt = db_conn()->prepare('SELECT id, type, date, author, hash FROM `revision` WHERE subj_id = ? ORDER BY id DESC');
         $stmt->bind_param('i', $sid);
         $stmt->bind_result($id, $type, $date, $author, $hash);
         $stmt->execute();
@@ -392,6 +390,89 @@ class Revision {
         return $_SERVER['DOCUMENT_ROOT'] . '/revs/' . $hash . '.txt';
     }
 
+    static function parse_rst($content) {
+        static $parser = null;
+        if (!$parser) {
+            $parser = new Gregwar\RST\Parser();
+        }
+        return $parser->parse($content);
+    }
+
+    static function parse_textile($content) {
+        static $parser = null;
+        if (!$parser) {
+            $parser = new \Netcarver\Textile\Parser();
+            $parser->setDocumentType('html5');
+            $parser->setRestricted(true);
+        }
+        return $parser->parse($content);
+    }
+
+    static function parse_markdown($content) {
+        static $purifier = null;
+        static $parser = null;
+        if (!$purifier) {
+            $config = HTMLPurifier_Config::createDefault();
+            $config->set('HTML.AllowedElements', [
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'hr',
+                'pre', 'code',
+                'blockquote',
+                'table', 'tr', 'td', 'th', 'thead', 'tbody',
+                'strong', 'em', 'b', 'i', 'u', 's', 'span',
+                'a', 'p', 'br', #'nobr',
+                'ul', 'ol', 'li',
+                'img',
+            ]);
+            $config->set('HTML.AllowedAttributes', ['th.align', 'td.align', 'ol.start', 'code.class', 'img.src']);
+            $purifier = new HTMLPurifier($config);
+        }
+        if (!$parser) {
+            $parser = new \cebe\markdown\Markdown();
+            $parser->html5 = true;
+            $parser->keepListStartNumber = true;
+        }
+
+        $clean = $purifier->purify($content);
+        return $parser->parse($clean);
+    }
+
+    static function parse_wr($content) {
+        static $parser = null;
+        static $parser2;
+        if (!$parser) {
+            $parser = new WikiRenderer('phpwiki_to_dokuwiki');
+            $parser2 = new WikiRenderer('dokuwiki_to_xhtml');
+        }
+        return $parser2->render($parser->render($content));
+    }
+
+    static function parse_mediawiki($content) {
+        static $parser = null;
+        static $opts;
+        if (!$parser) {
+            $parser = new Parser();
+            $opts = new ParserOptions();
+        }
+        $output = $parser->parse($content, '', $opts);
+        return $output->getText();
+    }
+
+    static function parse_creole($content) {
+        static $parser = null;
+        if (!$parser) {
+            $parser = new \softark\creole\Creole();
+            $parser->html5 = true;
+            $parser->keepListStartNumber = true;
+        }
+
+        return $parser->parse($content);
+    }
+
+    static function parse($content) {
+        return $content;
+    }
+
     public $id;
     public $sid;
     public $type;
@@ -400,7 +481,7 @@ class Revision {
 
     protected function __construct($id, $sid, $type, $date, $author, $hash) {
         $this->id = $id;
-        $this->sid = $sid;
+        $this->subj_id = $sid;
         $this->type = $type;
         $this->date = $date;
         $this->author = $author;
@@ -418,22 +499,20 @@ class Revision {
 
     function content() {
         $content = $this->raw_content();
-        errlog($content);
         $content = preg_replace_callback(LINK_REGEX, function($match) {
             $title = $match[1];
             $subj = Subject::by_id($match[2]);
             if (!$title) {
                 $title =  $subj->name;
             }
-            return "[$title]({$subj->url()})";
+            $url = $subj->url();
+            return "link:{$url}[$title]";
         }, $content);
-        errlog($content);
-        return $content;
+        return static::parse($content);
     }
 
     function editor_content() {
         $content = $this->raw_content();
-        errlog($content);
         $content = preg_replace_callback(LINK_REGEX, function($match) {
             $title = $match[1];
             if ($title) {
@@ -442,8 +521,12 @@ class Revision {
             $subj = Subject::by_id($match[2]);
             return '{{'."$title{$subj->_url}}}";
         }, $content);
-        errlog($content);
         return $content;
+    }
+
+    function url() {
+        $subj = Subject::by_id($this->subj_id);
+        return $subj->url() . '/_rev?rev=' . $this->id;
     }
 }
 

@@ -1,9 +1,7 @@
 <?
-require_once 'lib/session.inc.php';
+require_once 'lib/main.inc.php';
 require_once 'lib/Game.class.php';
 require_once 'lib/Subject.class.php';
-require_once 'lib/User.class.php';
-require_once 'lib/site.inc.php';
 
 $user = User::from_session();
 

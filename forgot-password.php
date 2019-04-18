@@ -1,9 +1,7 @@
 <?
-require_once 'lib/session.inc.php';
+require_once 'lib/main.inc.php';
 require_once 'lib/AuthenticationCode.class.php';
-require_once 'lib/User.class.php';
 require_once 'lib/mail.inc.php';
-require_once 'lib/site.inc.php';
 
 define('AUTH_EXP_SEC', 86400 * 5);
 define('AUTH_EXP_EN', 'five days');

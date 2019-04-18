@@ -28,9 +28,18 @@ CREATE TABLE subject (
 CREATE TABLE revision (
     id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     subj_id int(10) UNSIGNED NOT NULL COMMENT 'FK subject.id',
-    type ENUM('gmpriv', 'gmpub', 'plr'),
-    date timestamp,
+    type ENUM('gmpriv', 'gmpub', 'plr') NOT NULL,
+    date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     author int(10) UNSIGNED NOT NULL COMMENT 'FK user.id',
+    hash char(64) COLLATE ascii_bin,
+    PRIMARY KEY (id)
+) ENGINE=MyISAM DEFAULT CHARSET=ascii;
+
+CREATE TABLE upload (
+    id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    url varchar(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    uploader int(10) UNSIGNED NOT NULL COMMENT 'FK user.id',
+    date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     hash char(64) COLLATE ascii_bin,
     PRIMARY KEY (id)
 ) ENGINE=MyISAM DEFAULT CHARSET=ascii;
